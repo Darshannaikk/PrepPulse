@@ -37,12 +37,11 @@ export async function signUp(params: SignUpParams) {
         message: "User already exists. Please sign in.",
       };
 
-    // save user to db
+    // save user to db with only the necessary fields
     await db.collection("users").doc(uid).set({
       name,
       email,
-      // profileURL,
-      // resumeURL,
+      createdAt: new Date().toISOString(), // Add the timeline in ISO format
     });
 
     return {
@@ -79,8 +78,13 @@ export async function signIn(params: SignInParams) {
       };
 
     await setSessionCookie(idToken);
-  } catch (error: any) {
-    console.log("");
+    // Add a success return statement
+    return {
+      success: true,
+      message: "Signed in successfully",
+    };
+  } catch (error: unknown) {
+    console.log(error);
 
     return {
       success: false,
