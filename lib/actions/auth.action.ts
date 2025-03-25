@@ -37,22 +37,27 @@ export async function signUp(params: SignUpParams) {
         message: "User already exists. Please sign in.",
       };
 
-    // save user to db with only the necessary fields
+    // save user to db
     await db.collection("users").doc(uid).set({
       name,
       email,
-      createdAt: new Date().toISOString(), // Add the timeline in ISO format
+      // profileURL,
+      // resumeURL,
     });
 
     return {
       success: true,
       message: "Account created successfully. Please sign in.",
     };
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error("Error creating user:", error);
 
     // Handle Firebase specific errors
-    if (error.code === "auth/email-already-exists") {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      error.code === "auth/email-already-exists"
+    ) {
       return {
         success: false,
         message: "This email is already in use",
@@ -78,13 +83,8 @@ export async function signIn(params: SignInParams) {
       };
 
     await setSessionCookie(idToken);
-    // Add a success return statement
-    return {
-      success: true,
-      message: "Signed in successfully",
-    };
-  } catch (error: unknown) {
-    console.log(error);
+  } catch {
+    console.log("Sign in error occurred");
 
     return {
       success: false,
